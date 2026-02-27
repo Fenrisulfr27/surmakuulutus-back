@@ -1,35 +1,53 @@
 // @ts-nocheck
 import express from "express";
+import mongoose from "mongoose";
+import { Ad } from "./models/Ad.js";
 import cors from "cors";
-import fs from "fs";
 
 const app = express();
-const PORT = 5000;
-
-app.use(cors());
 app.use(express.json());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:5173"],
+  }),
+);
 
-const DATA_FILE = "./ads.json";
+mongoose;
+mongoose
+  .connect("mongodb://mongo:27017/surmakuulutus")
+  .then(() => console.log("MongoDB connected"))
+  .catch(console.error);
 
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify([]));
-}
+app.get("/ads", async (req, res) => {
+  try {
+    const ads = await Ad.find();
+    res.json(ads);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+app.get("/ads/:id", async (req, res) => {
+  try {
+    const ad = await Ad.findById(req.params.id);
 
-app.get("/ads", (req, res) => {
-  const data = JSON.parse(fs.readFileSync(DATA_FILE));
-  res.json(data);
+    if (!ad) {
+      return res.status(404).json({ error: "Kuulutust ei leitud" });
+    }
+
+    res.json(ad);
+  } catch (err) {
+    res.status(400).json({ error: "Vale ID formaat" });
+  }
 });
 
-app.post("/ads", (req, res) => {
-  const ads = JSON.parse(fs.readFileSync(DATA_FILE));
-  const newAd = { id: Date.now(), ...req.body };
-
-  ads.push(newAd);
-  fs.writeFileSync(DATA_FILE, JSON.stringify(ads, null, 2));
-
-  res.status(201).json(newAd);
+app.post("/ads", async (req, res) => {
+  try {
+    const newAd = new Ad(req.body);
+    await newAd.save();
+    res.status(201).json(newAd);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server working: http://localhost:${PORT}`);
-});
+app.listen(5000, "0.0.0.0", () => console.log("Server töötab port 5000"));
