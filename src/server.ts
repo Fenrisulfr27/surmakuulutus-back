@@ -10,10 +10,12 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      " https://surmakuulutus.netlify.app",
+      "http://localhost:3000", // dev frontend
+      "http://localhost:5173", // Vite dev server
+      "https://surmakuulutus.netlify.app", // live frontend
     ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // kui vaja
   }),
 );
 
