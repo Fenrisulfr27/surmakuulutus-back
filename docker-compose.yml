@@ -10,16 +10,12 @@ services:
       - mongo-data:/data/db
 
   backend:
-    image: node:20
+    build: .
     container_name: surmakuulutus-backend
-    working_dir: /app
-    volumes:
-      - .:/app
     ports:
       - "5000:5000"
     depends_on:
       - mongo
-    command: sh -c "npm install && node server.js"
 
 volumes:
   mongo-data:

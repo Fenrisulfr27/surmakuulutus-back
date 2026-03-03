@@ -1,20 +1,27 @@
-// @ts-nocheck
 import express from "express";
 import mongoose from "mongoose";
-import { Ad } from "./models/Ad.js";
 import cors from "cors";
+import { Ad } from "./models/ad.js";
 
 const app = express();
+
 app.use(express.json());
+
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      " https://surmakuulutus.netlify.app",
+    ],
   }),
 );
 
-mongoose;
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI as string;
+
 mongoose
-  .connect("mongodb://mongo:27017/surmakuulutus")
+  .connect(MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(console.error);
 
@@ -23,9 +30,11 @@ app.get("/ads", async (req, res) => {
     const ads = await Ad.find();
     res.json(ads);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
   }
 });
+
 app.get("/ads/:id", async (req, res) => {
   try {
     const ad = await Ad.findById(req.params.id);
@@ -35,7 +44,7 @@ app.get("/ads/:id", async (req, res) => {
     }
 
     res.json(ad);
-  } catch (err) {
+  } catch {
     res.status(400).json({ error: "Vale ID formaat" });
   }
 });
@@ -46,8 +55,9 @@ app.post("/ads", async (req, res) => {
     await newAd.save();
     res.status(201).json(newAd);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(400).json({ error: message });
   }
 });
 
-app.listen(5000, "0.0.0.0", () => console.log("Server töötab port 5000"));
+app.listen(PORT, () => console.log(`Server töötab port ${PORT}`));
