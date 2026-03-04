@@ -29,14 +29,31 @@ mongoose
 
 app.get("/ads", async (req, res) => {
   try {
-    const ads = await Ad.find();
-    res.json(ads);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 6;
+
+    const skip = (page - 1) * limit;
+
+    const totalAds = await Ad.countDocuments();
+
+    const ads = await Ad.find()
+      .sort({ createdAt: -1 }) // uuemad ees (soovituslik)
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(totalAds / limit);
+
+    res.json({
+      data: ads,
+      totalPages,
+      currentPage: page,
+      totalAds,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     res.status(500).json({ error: message });
   }
 });
-
 app.get("/ads/:id", async (req, res) => {
   try {
     const ad = await Ad.findById(req.params.id);
