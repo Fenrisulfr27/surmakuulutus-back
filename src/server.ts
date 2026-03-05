@@ -72,7 +72,18 @@ app.post("/ads", async (req, res) => {
   try {
     const { name } = req.body;
 
-    const slug = slugify(name);
+    if (!name) {
+      return res.status(400).json({ error: "Nimi on kohustuslik" });
+    }
+
+    const baseSlug = slugify(name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (await Ad.findOne({ slug })) {
+      counter++;
+      slug = `${baseSlug}-${counter}`;
+    }
 
     const newAd = new Ad({
       ...req.body,
