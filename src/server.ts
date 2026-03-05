@@ -54,6 +54,41 @@ app.get("/ads", async (req, res) => {
     res.status(500).json({ error: message });
   }
 });
+app.get("/ads/:slug", async (req, res) => {
+  try {
+    const ad = await Ad.findOne({ slug: req.params.slug });
+
+    if (!ad) {
+      return res.status(404).json({ error: "Kuulutust ei leitud" });
+    }
+
+    res.json(ad);
+  } catch {
+    res.status(400).json({ error: "Viga päringus" });
+  }
+});
+
+app.post("/ads", async (req, res) => {
+  try {
+    const { name, birthYear, deathYear } = req.body;
+
+    const slug =
+      slugify(name) +
+      (birthYear && deathYear ? `-${birthYear}-${deathYear}` : "");
+
+    const newAd = new Ad({
+      ...req.body,
+      slug,
+    });
+
+    await newAd.save();
+
+    res.status(201).json(newAd);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(400).json({ error: message });
+  }
+});
 app.get("/ads/:id", async (req, res) => {
   try {
     const ad = await Ad.findById(req.params.id);
@@ -67,16 +102,13 @@ app.get("/ads/:id", async (req, res) => {
     res.status(400).json({ error: "Vale ID formaat" });
   }
 });
-
-app.post("/ads", async (req, res) => {
-  try {
-    const newAd = new Ad(req.body);
-    await newAd.save();
-    res.status(201).json(newAd);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    res.status(400).json({ error: message });
-  }
-});
-
 app.listen(PORT, () => console.log(`Server töötab port ${PORT}`));
+const slugify = (text: string) => {
+  return text
+    .toLowerCase()
+    .replaceAll("õ", "o")
+    .replaceAll("ä", "a")
+    .replaceAll("ö", "o")
+    .replaceAll("ü", "u")
+    .replace(/\s+/g, "-");
+};
