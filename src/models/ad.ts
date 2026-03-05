@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const adSchema = new mongoose.Schema(
   {
-    firstName: { type: String, required: true },
+    name: { type: String, required: true },
     slug: { type: String, unique: true },
     email: { type: String, required: true },
     birthYear: { type: Number },

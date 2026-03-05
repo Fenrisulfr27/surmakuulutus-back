@@ -37,7 +37,7 @@ app.get("/ads", async (req, res) => {
     const totalAds = await Ad.countDocuments();
 
     const ads = await Ad.find()
-      .sort({ createdAt: -1 }) // uuemad ees (soovituslik)
+      .sort({ createdAt: -1 }) // uuemad ees
       .skip(skip)
       .limit(limit);
 
@@ -70,11 +70,9 @@ app.get("/ads/:slug", async (req, res) => {
 
 app.post("/ads", async (req, res) => {
   try {
-    const { name, birthYear, deathYear } = req.body;
+    const { name } = req.body;
 
-    const slug =
-      slugify(name) +
-      (birthYear && deathYear ? `-${birthYear}-${deathYear}` : "");
+    const slug = slugify(name);
 
     const newAd = new Ad({
       ...req.body,
