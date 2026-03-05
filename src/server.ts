@@ -103,9 +103,11 @@ app.listen(PORT, () => console.log(`Server töötab port ${PORT}`));
 const slugify = (text: string) => {
   return text
     .toLowerCase()
-    .replaceAll("õ", "o")
-    .replaceAll("ä", "a")
-    .replaceAll("ö", "o")
-    .replaceAll("ü", "u")
-    .replace(/\s+/g, "-");
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 };
