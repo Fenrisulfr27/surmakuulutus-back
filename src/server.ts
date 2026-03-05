@@ -89,19 +89,7 @@ app.post("/ads", async (req, res) => {
     res.status(400).json({ error: message });
   }
 });
-app.get("/ads/:id", async (req, res) => {
-  try {
-    const ad = await Ad.findById(req.params.id);
 
-    if (!ad) {
-      return res.status(404).json({ error: "Kuulutust ei leitud" });
-    }
-
-    res.json(ad);
-  } catch {
-    res.status(400).json({ error: "Vale ID formaat" });
-  }
-});
 app.listen(PORT, () => console.log(`Server töötab port ${PORT}`));
 const slugify = (text: string) => {
   return text
