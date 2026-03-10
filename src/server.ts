@@ -29,29 +29,24 @@ mongoose
 
 app.get("/ads", async (req, res) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 6;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Number(req.query.limit) || 6, 50);
 
     const skip = (page - 1) * limit;
 
-    const totalAds = await Ad.countDocuments();
-
-    const ads = await Ad.find()
-      .sort({ createdAt: -1 }) // uuemad ees
-      .skip(skip)
-      .limit(limit);
-
-    const totalPages = Math.ceil(totalAds / limit);
+    const [totalAds, ads] = await Promise.all([
+      Ad.countDocuments(),
+      Ad.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+    ]);
 
     res.json({
       data: ads,
-      totalPages,
+      totalPages: Math.ceil(totalAds / limit),
       currentPage: page,
       totalAds,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    res.status(500).json({ error: message });
+    res.status(500).json({ error: "Server error" });
   }
 });
 app.get("/ads/:slug", async (req, res) => {
